@@ -21,8 +21,8 @@ export class Schema {
         return node.toJSON();
     }
 
-    find(_name) {
-        return this.item.find(({name}) => name === name);
+    find(name) {
+        return this.item.find(({name: x}) => x === name);
     }
 
     toJSON() {
