@@ -1,3 +1,16 @@
+export function findAtSign( sign, nodes ) {
+    return nodes.find( ([node]) => equalSign(sign, node) );
+}
+
+export function equalSign(sign, node) {
+    if(typeof sign === "object") {
+        return Object.keys( sign ).every( equalSign( sign[key], node[key]) );
+    }
+    else {
+        return sign === node;
+    }
+}
+
 export class Schema {
 
     constructor([ name, props, ...next ]) {
@@ -29,7 +42,13 @@ export class Schema {
         return [ this.name, this.props, ...this.item.map( Schema.toJSON ) ];
     }
 
-    merge( [ name, props, ...item ], type = "one-by-one" ) {
+    mergeIfExistAt(nodes) {
+        const exist = findAtSign(this.name, nodes);
+        exist && this.merge(exist);
+        return this;
+    }
+
+    merge( [ sign, props, ...item ], type = "one-by-one" ) {
         if(type === "one-by-one") {
             this.props = {...this.props, ...props};
             item.map( item => {
