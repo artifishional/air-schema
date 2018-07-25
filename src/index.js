@@ -52,7 +52,7 @@ export class Schema {
         if(type === "one-by-one") {
             this.props = {...this.props, ...props};
             item.map( item => {
-                const exist = this.item.find( ([name]) => item[0] === name );
+                const exist = this.item.find( ({name}) => item[0] === name );
                 exist ? exist.merge(item) : this.item.push( new Schema(item) );
             } );
         }
