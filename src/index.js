@@ -6,8 +6,23 @@ export function equalSign(sign, node) {
     if(typeof sign === "object") {
         return Object.keys( sign ).every( equalSign( sign[key], node[key]) );
     }
+    else if(typeof sign === "string") {
+        return new RegExp(`^${sign}$`).test(node);
+    }
     else {
         return sign === node;
+    }
+}
+
+export function equalsubs(subs, node) {
+    if(typeof subs === "object") {
+        return Object.keys( node[key] ).every( equalsubs( subs[key], node[key]) );
+    }
+    else if(typeof subs === "string") {
+        return new RegExp(`^${node}$`).test(subs);
+    }
+    else {
+        return subs === node;
     }
 }
 
@@ -44,6 +59,12 @@ export class Schema {
 
     mergeIfExistAt(nodes) {
         const exist = findAtSign(this.name, nodes);
+        exist && this.merge(exist);
+        return this;
+    }
+
+    subscription(nodes) {
+        const exist = nodes.find( ([node]) => equalsubs(this.name, node) );
         exist && this.merge(exist);
         return this;
     }
