@@ -3,8 +3,9 @@ export function findAtSign( sign, nodes ) {
 }
 
 export function equalSign(sign, node) {
+    if(sign === "*") return true;
     if(typeof sign === "object") {
-        return Object.keys( sign ).every( equalSign( sign[key], node[key]) );
+        return Object.keys( sign ).every( key => equalSign( sign[key], node[key]) );
     }
     else if(typeof sign === "string") {
         return new RegExp(`^${sign}$`).test(node);
@@ -15,8 +16,9 @@ export function equalSign(sign, node) {
 }
 
 export function equalsubs(subs, node) {
+    if(node === "*") return true;
     if(typeof subs === "object") {
-        return Object.keys( node[key] ).every( equalsubs( subs[key], node[key]) );
+        return Object.keys( node ).every( key => equalsubs( subs[key], node[key]) );
     }
     else if(typeof subs === "string") {
         return new RegExp(`^${node}$`).test(subs);
