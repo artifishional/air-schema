@@ -32,6 +32,10 @@ export class Schema {
 
     constructor([ name, props, ...next ]) {
         this.name = name;
+        if(typeof props === "function") {
+            this.filler = props;
+            props = {};
+        }
         if(Array.isArray(props)) {
             this.item = [ new Schema(props) ];
             this.props = {};
@@ -45,6 +49,15 @@ export class Schema {
 
     static create(schema) {
         return new Schema(schema);
+    }
+
+    fill(schema) {
+
+        if( !this.filler ) {
+            return;
+        }
+
+        this.props = this.filler(schema[1]);
     }
 
     static toJSON(node) {
