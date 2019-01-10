@@ -52,12 +52,11 @@ export class Schema {
     }
 
     fill(schema) {
-
         if( !this.filler ) {
             return;
         }
-
-        this.props = this.filler(schema[1]);
+        this.merge( this.filler(schema[1]) );
+        return this;
     }
 
     static toJSON(node) {
