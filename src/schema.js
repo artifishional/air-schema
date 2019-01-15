@@ -24,8 +24,12 @@ export default class Schema extends Array {
         return this.slice(2);
     }
 
+    get prop() {
+        return this[1];
+    }
+
     lift( data ) {
-        return new Schema( data );
+        return new this.constructor( data );
     }
 
     activate(schema) {
