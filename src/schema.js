@@ -1,33 +1,38 @@
 import {equalsubs, findAtSign} from "./utils"
+let ACID = 0;
 
-export default class Schema {
+export default class Schema extends Array {
 
-    constructor([ name, props, ...next ]) {
-        this.name = name;
+    constructor([ key, props, ...next ]) {
+        super(2);
+        let item = null;
         if(typeof props === "function") {
-            this.filler = props;
+            this.__activator = props;
             props = {};
         }
         if(Array.isArray(props)) {
-            this.item = [ this.lift(props) ];
-            this.props = {};
-            this.item.push(...next.map( this.lift, this ));
+            this[2] = this.lift(props);
+            this[1] = {};
         }
         else {
-            this.item = next.map( this.lift, this );
-            this.props = props;
+            this[1] = props;
         }
+        this.push(...next.map( this.lift, this ));
+    }
+
+    get item() {
+        return this.slice(2);
     }
 
     lift( data ) {
         return new Schema( data );
     }
 
-    fill(schema) {
-        if( !this.filler ) {
+    activate(schema) {
+        if( !this.__activator ) {
             return;
         }
-        this.merge( this.filler(schema[1]) );
+        this.merge( this.__activator(schema[1]) );
         return this;
     }
 
@@ -36,17 +41,24 @@ export default class Schema {
     }
 
     find(name) {
-        return this.item.find(({name: x}) => x === name);
+        return this.find(({name: x}) => x === name);
     }
 
     toJSON() {
-        return [ this.name, this.props, ...this.item.map( Schema.toJSON ) ];
+        return [ this.name, this.props, ...this.map( Schema.toJSON ) ];
     }
 
     mergeIfExistAt(nodes) {
         const exist = findAtSign(this.name, nodes);
         exist && this.merge(exist);
         return this;
+    }
+
+    /**
+     * @param {*} signature common data
+     */
+    getAtSignature( signature ) {
+
     }
 
     subscription(nodes) {
@@ -57,10 +69,10 @@ export default class Schema {
 
     merge( [ sign, props, ...item ], type = "one-by-one" ) {
         if(type === "one-by-one") {
-            this.props = {...this.props, ...props};
+            this[1] = {...this[1], ...props};
             item.map( item => {
-                const exist = this.item.find( ({name}) => item[0] === name );
-                exist ? exist.merge(item) : this.item.push( this.lift(item) );
+                const exist = this.find( ([ key ]) => item[0] === key );
+                exist ? exist.merge(item) : this.push( this.lift(item) );
             } );
         }
         else {
