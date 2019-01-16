@@ -3,25 +3,29 @@ let ACID = 0;
 
 export default class Schema extends Array {
 
-    constructor([ key, props, ...next ]) {
-        super(2);
-        let item = null;
-        if(typeof props === "function") {
-            this.__activator = props;
-            props = {};
+    constructor(data) {
+        const [ key, prop, ...item ] = Schema.normilize( data );
+
+        if(prop.hasOwnProperty(1)) {
+            debugger;
         }
-        if(Array.isArray(props)) {
-            this[2] = this.lift(props);
+
+        super( key, prop );
+        this.acid = ++ACID;
+        if(typeof prop === "function") {
+            this.__activator = prop;
             this[1] = {};
         }
-        else {
-            this[1] = props;
-        }
-        this.push(...next.map( this.lift, this ));
+        this.layers = [ this ];
+        this.push(...item.map( this.lift, this ));
     }
 
     get item() {
         return this.slice(2);
+    }
+
+    static get [Symbol.species]() {
+        return Array;
     }
 
     get prop() {
@@ -44,12 +48,12 @@ export default class Schema extends Array {
         return node.toJSON();
     }
 
-    find(name) {
-        return this.find(({name: x}) => x === name);
+    findByName(name) {
+        throw "unused";
     }
 
     toJSON() {
-        return [ this.name, this.props, ...this.map( Schema.toJSON ) ];
+        return [ this.name, this.prop, ...this.map( Schema.toJSON ) ];
     }
 
     mergeIfExistAt(nodes) {
@@ -71,16 +75,28 @@ export default class Schema extends Array {
         return this;
     }
 
-    merge( [ sign, props, ...item ], type = "one-by-one" ) {
+    static normilize( [ key, prop, ...item ] ) {
+        if(Array.isArray(prop)) {
+            return [ key, {}, prop, ...item ];
+        }
+        return [ key, prop, ...item ];
+    }
+
+    merge( data, type = "one-by-one" ) {
+        if(!(data instanceof Schema)) data = new Schema( data );
+        this.layers.push( data );
+        const [ key, prop, ...item ] = data;
+        debugger;
         if(type === "one-by-one") {
-            this[1] = {...this[1], ...props};
+            this[1] = {...this[1], ...prop};
             item.map( item => {
-                const exist = this.find( ([ key ]) => item[0] === key );
+                const exist = this.item.find( ([ key ]) => item[0] === key );
                 exist ? exist.merge(item) : this.push( this.lift(item) );
             } );
+            debugger;
         }
         else {
-            throw new TypeError(`unsupported type '${type}'`);
+            throw new TypeError(`unsupported merge "${type}" type`);
         }
         return this;
     }
