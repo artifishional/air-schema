@@ -1,15 +1,17 @@
 import {equalsubs, findAtSign} from "./utils"
 let ACID = 0;
 
+function normilize( [ key, prop, ...item ] ) {
+	if(Array.isArray(prop)) {
+		return [ key, {}, prop, ...item ];
+	}
+	return [ key, prop, ...item ];
+}
+
 export default class Schema extends Array {
 
     constructor(data) {
-        const [ key, prop, ...item ] = Schema.normilize( data );
-
-        if(prop.hasOwnProperty(1)) {
-            debugger;
-        }
-
+        const [ key, prop, ...item ] = normilize( data );
         super( key, prop );
         this.acid = ++ACID;
         if(typeof prop === "function") {
@@ -17,7 +19,7 @@ export default class Schema extends Array {
             this[1] = {};
         }
         this.layers = [ this ];
-        this.push(...item.map( this.lift, this ));
+        this.append( ...item );
     }
 
     get item() {
@@ -32,8 +34,36 @@ export default class Schema extends Array {
         return this[1];
     }
 
-    lift( data ) {
-        return new this.constructor( data );
+    lift( data, src ) {
+        return new this.constructor( data, src );
+    }
+	
+	parse(data, src) {
+		if(typeof data === "string") {
+			return this.lift( JSON.parse(data), src );
+		}
+		else {
+			return this.lift( data, src );
+		}
+    }
+	
+	appendData( data ) {
+        let res = null;
+		if(data.prototype instanceof Schema) {
+			res = new data( [], this.src );
+		}
+		else {
+			res = this.parse( data, this.src );
+		}
+		this.merge( res );
+    }
+	
+	append( ...item ) {
+		item.map( item => {
+		    if(!(item instanceof Schema)) throw new TypeError();
+			const exist = this.item.find( ([ key ]) => item[0] === key );
+			exist ? exist.merge(item) : this.push( item );
+		} );
     }
 
     activate(schema) {
@@ -48,56 +78,32 @@ export default class Schema extends Array {
         return node.toJSON();
     }
 
-    findByName(name) {
-        throw "unused";
-    }
-
     toJSON() {
         return [ this.name, this.prop, ...this.map( Schema.toJSON ) ];
     }
-
+    
+    get key() {
+        return this[0];
+    }
+    
     mergeIfExistAt(nodes) {
         const exist = findAtSign(this.name, nodes);
         exist && this.merge(exist);
         return this;
     }
-
-    /**
-     * @param {*} signature common data
-     */
-    getAtSignature( signature ) {
-
+	
+	mergeProperies( name, value ) {
+        return value;
     }
 
-    subscription(nodes) {
-        const exist = nodes.find( ([node]) => equalsubs(this.name, node) );
-        exist && this.merge(exist);
-        return this;
-    }
-
-    static normilize( [ key, prop, ...item ] ) {
-        if(Array.isArray(prop)) {
-            return [ key, {}, prop, ...item ];
-        }
-        return [ key, prop, ...item ];
-    }
-
-    merge( data, type = "one-by-one" ) {
+    merge( data ) {
         if(!(data instanceof Schema)) data = new Schema( data );
         this.layers.push( data );
         const [ key, prop, ...item ] = data;
-        debugger;
-        if(type === "one-by-one") {
-            this[1] = {...this[1], ...prop};
-            item.map( item => {
-                const exist = this.item.find( ([ key ]) => item[0] === key );
-                exist ? exist.merge(item) : this.push( this.lift(item) );
-            } );
-            debugger;
-        }
-        else {
-            throw new TypeError(`unsupported merge "${type}" type`);
-        }
+        Object.keys(prop).map( name => {
+	        this.prop[name] = this.mergeProperies( name, prop[name] );
+        } );
+        this.append( ...item );
         return this;
     }
 
