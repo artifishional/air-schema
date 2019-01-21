@@ -92,7 +92,7 @@ export default class Schema extends Array {
         return this;
     }
 	
-	mergeProperies( name, value ) {
+	mergeProperties( name, value ) {
         return value;
     }
 
@@ -101,7 +101,7 @@ export default class Schema extends Array {
         this.layers.push( data );
         const [ key, prop, ...item ] = data;
         Object.keys(prop).map( name => {
-	        this.prop[name] = this.mergeProperies( name, prop[name] );
+	        this.prop[name] = this.mergeProperties( name, prop[name] );
         } );
         this.append( ...item );
         return this;
