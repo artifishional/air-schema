@@ -10,7 +10,7 @@ function normilize( [ key, prop, ...item ] ) {
 
 export default class Schema extends Array {
 
-    constructor(data) {
+    constructor(data, src, { pack } = {}) {
         const [ key, prop, ...item ] = normilize( data );
         super( key, prop );
         this.acid = ++ACID;
@@ -47,13 +47,13 @@ export default class Schema extends Array {
 		}
     }
 	
-	appendData( data ) {
+	appendData( { data, pack } ) {
         let res = null;
 		if(data.prototype instanceof Schema) {
-			res = new data( [], this.src );
+			res = new data( [], this.src, { pack } );
 		}
 		else {
-			res = this.parse( data, this.src );
+			res = this.parse( data, this.src, { pack } );
 		}
 		this.merge( res );
     }
