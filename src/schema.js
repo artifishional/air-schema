@@ -74,6 +74,10 @@ export default class Schema extends Array {
         return this;
     }
 
+    own( parent ) {
+        this.parent = parent;
+    }
+
     static toJSON(node) {
         return node.toJSON();
     }
@@ -99,6 +103,7 @@ export default class Schema extends Array {
     merge( data ) {
         if(!(data instanceof Schema)) data = new Schema( data );
         this.layers.push( data );
+        data.own( this );
         const [ key, prop, ...item ] = data;
         Object.keys(prop).map( name => {
 	        this.prop[name] = this.mergeProperties( name, prop[name] );
