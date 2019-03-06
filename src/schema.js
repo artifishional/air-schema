@@ -1,4 +1,4 @@
-import {equalsubs, findAtSign} from "./utils"
+import {findAtSign} from "./utils"
 let ACID = 0;
 
 function normilize( [ key, prop, ...item ] ) {
@@ -10,10 +10,10 @@ function normilize( [ key, prop, ...item ] ) {
 
 export default class Schema extends Array {
 
-    constructor(data, src, { pack } = {}) {
+    constructor(data, src, { acid = "" } = {}) {
         const [ key, prop, ...item ] = normilize( data );
         super( key, prop );
-        this.acid = ++ACID;
+        this.acid = `${++ACID}/${acid}`;
         if(typeof prop === "function") {
             this.__activator = prop;
             this[1] = {};
@@ -34,8 +34,8 @@ export default class Schema extends Array {
         return this[1];
     }
 
-    lift( data, src ) {
-        return new this.constructor( data, src );
+    lift( data, src, origin ) {
+        return new this.constructor( data, src, origin );
     }
 	
 	parse(data, src) {
@@ -60,7 +60,9 @@ export default class Schema extends Array {
 	
 	append( ...item ) {
 		item.map( item => {
-		    if(!(item instanceof Schema)) throw new TypeError();
+		    if(!(item instanceof Schema)) {
+                item = this.parse( item, this );
+            }
 			const exist = this.item.find( ([ key ]) => item[0] === key );
 			exist ? exist.merge(item) : this.push( item );
 		} );
@@ -72,10 +74,6 @@ export default class Schema extends Array {
         }
         this.merge( this.__activator(schema[1]) );
         return this;
-    }
-
-    own( parent ) {
-        this.parent = parent;
     }
 
     static toJSON(node) {
@@ -103,7 +101,6 @@ export default class Schema extends Array {
     merge( data ) {
         if(!(data instanceof Schema)) data = new Schema( data );
         this.layers.push( data );
-        data.own( this );
         const [ key, prop, ...item ] = data;
         Object.keys(prop).map( name => {
 	        this.prop[name] = this.mergeProperties( name, prop[name] );
