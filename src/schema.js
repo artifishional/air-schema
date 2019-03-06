@@ -10,7 +10,7 @@ function normilize( [ key, prop, ...item ] ) {
 
 export default class Schema extends Array {
 
-    constructor(data, src, { acid = "" } = {}) {
+    constructor(data, src, { acid = "", pack } = {}) {
         const [ key, prop, ...item ] = normilize( data );
         super( key, prop );
         this.acid = `${++ACID}/${acid}`;
