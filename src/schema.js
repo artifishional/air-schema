@@ -13,7 +13,7 @@ export default class Schema extends Array {
     constructor(data, src, { acid = "", pack } = {}) {
         const [ key, prop, ...item ] = normilize( data );
         super( key, prop );
-        this.acid = `${++ACID}/${acid}`;
+        this.acid = acid ? `${++ACID}/${acid}` : ++ACID;
         if(typeof prop === "function") {
             this.__activator = prop;
             this[1] = {};
