@@ -81,7 +81,7 @@ export default class Schema extends Array {
     }
 
     toJSON() {
-        return [ this.name, this.prop, ...this.map( Schema.toJSON ) ];
+        return [ this.key, this.prop, ...this.slice(2).map( Schema.toJSON ) ];
     }
     
     get key() {
