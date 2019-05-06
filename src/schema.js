@@ -1,4 +1,4 @@
-import {findAtSign} from "./utils"
+import {findAtSign, equal} from "./utils"
 let ACID = 0;
 
 function normilize( [ key, prop, ...item ] ) {
@@ -63,7 +63,7 @@ export default class Schema extends Array {
 		    if(!(item instanceof Schema)) {
                 item = this.parse( item, this );
             }
-			const exist = this.item.find( ([ key ]) => item[0] === key );
+			const exist = this.item.find( ([ key ]) => equal(item[0], key) );
 			exist ? exist.merge(item) : this.push( item );
 		} );
     }
