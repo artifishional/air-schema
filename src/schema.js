@@ -75,7 +75,11 @@ export default class Schema extends Array {
         this.merge( this.__activator(schema[1]) );
         return this;
     }
-
+    
+	acidis(name) {
+		return (this.acid+"").indexOf(name) > -1;
+	}
+	
     static toJSON(node) {
         return node.toJSON();
     }
