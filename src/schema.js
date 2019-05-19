@@ -19,13 +19,10 @@ export default class Schema extends Array {
             this[1] = {};
         }
         this.layers = [ this ];
+        this.item = [];
         this.append( ...item );
     }
-
-    get item() {
-        return this.slice(2);
-    }
-
+    
     static get [Symbol.species]() {
         return Array;
     }
@@ -66,6 +63,11 @@ export default class Schema extends Array {
 			const exist = this.item.find( ([ key ]) => equal(item[0], key) );
 			exist ? exist.merge(item) : this.push( item );
 		} );
+    }
+    
+    push( ...item ) {
+	    this.item.push(...item);
+    	super.push( ...item );
     }
 
     activate(schema) {
