@@ -10,10 +10,10 @@ function normilize( [ key, prop, ...item ] ) {
 
 export default class Schema extends Array {
 
-    constructor(data, src, { acid = "", pack } = {}) {
+    constructor(data) {
         const [ key, prop, ...item ] = normilize( data );
         super( key, prop );
-        this.acid = acid ? `${++ACID}/${acid}` : ++ACID;
+        this.acid = ++ACID;
         if(typeof prop === "function") {
             this.__activator = prop;
             this[1] = {};
