@@ -44,13 +44,13 @@ export default class Schema extends Array {
 		}
     }
 	
-	appendData( { data, pack } ) {
+	appendData( { data, pack }, src ) {
         let res = null;
 		if(data.prototype instanceof Schema) {
-			res = new data( [], this.src, { pack } );
+			res = new data( [], src, { pack } );
 		}
 		else {
-			res = this.parse( data, this.src, { pack } );
+			res = this.parse( data, src, { pack } );
 		}
 		this.merge( res );
     }
