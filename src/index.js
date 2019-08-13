@@ -1,2 +1,2 @@
-export { default as Schema } from "./schema"
-export * from "./utils"
+export { default as Schema } from './schema';
+export * from './utils';
