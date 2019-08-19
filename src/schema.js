@@ -122,10 +122,12 @@ export default class Schema extends Array {
     this.leadlayer = leadlayer;
   }
 
-  merge (data) {
+  merge (data, hasUseDefaultLayer = false) {
     if (!(data instanceof Schema)) data = new Schema(data);
     this.layers.push(data);
-    data.setLeadLayer(this.leadlayer);
+    if(!hasUseDefaultLayer) {
+	    data.setLeadLayer(this.leadlayer);
+    }
     const [key, prop, ...item] = data;
     Object.keys(prop).map(name => {
       this.prop[name] = this.mergeProperties(name, prop[name]);
