@@ -11,7 +11,7 @@ function normilize ([key, prop, ...item]) {
 
 export default class Schema extends Array {
 
-  constructor (data) {
+  constructor (data, src) {
     const [key, prop, ...item] = normilize(data);
     super(key, prop);
     this.acid = ++ACID;
@@ -22,6 +22,7 @@ export default class Schema extends Array {
     this.leadlayer = this;
     this.layers = [this];
     this.item = [];
+    this.resourceloader = src.resourceloader;
     this.append(...item);
   }
 
