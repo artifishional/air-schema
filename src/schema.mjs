@@ -1,8 +1,8 @@
-import { findAtSign, equal } from './utils';
+import { findAtSign, equal } from './utils.mjs';
 
 let ACID = 0;
 
-function normilize ([key, prop, ...item]) {
+function normilize([key, prop, ...item]) {
   if (Array.isArray(prop)) {
     return [key, {}, prop, ...item];
   }
@@ -10,8 +10,7 @@ function normilize ([key, prop, ...item]) {
 }
 
 export default class Schema extends Array {
-
-  constructor (data) {
+  constructor(data) {
     const [key, prop, ...item] = normilize(data);
     super(key, prop);
     this.acid = ++ACID;
@@ -25,35 +24,34 @@ export default class Schema extends Array {
     this.append(...item);
   }
 
-  static get [Symbol.species] () {
+  static get [Symbol.species]() {
     return Array;
   }
 
-  get prop () {
+  get prop() {
     return this[1];
   }
 
-  get key () {
+  get key() {
     return this[0];
   }
 
-  static toJSON (node) {
+  static toJSON(node) {
     return node.toJSON();
   }
 
-  lift (data, src, origin) {
+  lift(data, src, origin) {
     return new this.constructor(data, src, origin);
   }
 
-  parse (data, src) {
+  parse(data, src) {
     if (typeof data === 'string') {
       return this.lift(JSON.parse(data), src);
-    } else {
-      return this.lift(data, src);
     }
+    return this.lift(data, src);
   }
 
-  appendData ({ data, pack }, src) {
+  appendData({ data, pack }, src) {
     let res = null;
     if (data.prototype instanceof Schema) {
       res = new data([], src, { pack });
@@ -63,8 +61,8 @@ export default class Schema extends Array {
     this.merge(res);
   }
 
-  append (...item) {
-    item.map(item => {
+  append(...item) {
+    item.map((item) => {
       if (!(item instanceof Schema)) {
         item = this.parse(item, this);
       }
@@ -73,26 +71,26 @@ export default class Schema extends Array {
     });
   }
 
-  findByAcid (acid) {
+  findByAcid(acid) {
     if (this.layers.some(({ acid: x }) => x === acid)) {
       return this;
-    } else {
-      for (let i = 0; i < this.item.length; i++) {
-        const res = this.item[i].findByAcid(acid);
-        if (res) {
-          return res;
-        }
+    }
+    for (let i = 0; i < this.item.length; i++) {
+      const res = this.item[i].findByAcid(acid);
+      if (res) {
+        return res;
       }
     }
+
     return null;
   }
 
-  push (...item) {
+  push(...item) {
     this.item.push(...item);
     super.push(...item);
   }
 
-  activate (schema) {
+  activate(schema) {
     if (!this.__activator) {
       return;
     }
@@ -100,40 +98,42 @@ export default class Schema extends Array {
     return this;
   }
 
-  acidis (name) {
-    return (this.acid + '').indexOf(name) > -1;
+  acidis(name) {
+    return (`${this.acid}`).indexOf(name) > -1;
   }
 
-  toJSON () {
+  toJSON() {
     return [this.key, this.prop, ...this.slice(2).map(Schema.toJSON)];
   }
 
-  mergeIfExistAt (nodes) {
+  mergeIfExistAt(nodes) {
     const exist = findAtSign(this.name, nodes);
-    exist && this.merge(exist);
+    if (exist) {
+      this.merge(exist);
+    }
     return this;
   }
 
-  mergeProperties (name, value) {
+  mergeProperties(name, value) {
     return value;
   }
 
-  setLeadLayer (leadlayer) {
+  setLeadLayer(leadlayer) {
     this.leadlayer = leadlayer;
   }
 
-  merge (data, hasUseDefaultLayer = false) {
+  merge(data, hasUseDefaultLayer = false) {
+    // eslint-disable-next-line no-param-reassign
     if (!(data instanceof Schema)) data = new Schema(data);
     this.layers.push(data);
-    if(!hasUseDefaultLayer) {
-	    data.setLeadLayer(this.leadlayer);
+    if (!hasUseDefaultLayer) {
+      data.setLeadLayer(this.leadlayer);
     }
-    const [key, prop, ...item] = data;
-    Object.keys(prop).map(name => {
+    const [, prop, ...item] = data;
+    Object.keys(prop).forEach((name) => {
       this.prop[name] = this.mergeProperties(name, prop[name]);
     });
     this.append(...item);
     return this;
   }
-
 }
